@@ -8,6 +8,8 @@ using UnityEngine.Events;
 public class BreathStrapManager : LabSingleton<BreathStrapManager>, IManager
 {
     protected float _breathValue = 0;
+    private bool _doWriteLabData = false;
+
     public event UnityAction<float> OnBreathValueUpdated;
     /* -------------------------------------------------------------------------- */    
     public void ManagerInit()
@@ -23,6 +25,15 @@ public class BreathStrapManager : LabSingleton<BreathStrapManager>, IManager
     }
 
     /* -------------------------------------------------------------------------- */
+
+    /// <summary>
+    /// 是否自動寫入 LabData，請先確認 LabDataManager 已初始化
+    /// </summary>
+    /// <param name="enable"></param>
+    public void AutoWriteLabData(bool enable = true)
+    {
+        _doWriteLabData = enable;
+    }
 
     /// <summary>
     /// 開始連接，請不要持續重複呼叫
@@ -73,6 +84,8 @@ public class BreathStrapManager : LabSingleton<BreathStrapManager>, IManager
                 }
                 _breathValue = breathValue;
                 OnBreathValueUpdated?.Invoke(breathValue);
+                if(_doWriteLabData)
+                    LabDataManager.Instance.WriteData(new BreathStrapData{breathValue=breathValue});
             }
             yield return null;
         }
